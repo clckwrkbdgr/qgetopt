@@ -2,6 +2,7 @@
 *.slo
 *.lo
 *.o
+tmp
 
 # Compiled Dynamic libraries
 *.so
@@ -11,3 +12,12 @@
 *.lai
 *.la
 *.a
+
+# Qt
+Makefile
+
+# Vim
+.*.swp
+
+# Target
+test
