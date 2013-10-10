@@ -1,21 +1,32 @@
 #pragma once
 #include <QtCore/QString>
+#include <QtCore/QStringList>
+#include <QtCore/QList>
 
 class QGetopt {
 public:
+	struct Option {
+		QChar option;
+		bool withArg;
+		QStringList args;
+		int count;
+		Option() : withArg(false), count(0) {}
+		Option(const QChar & _option, bool _withArg = false) : option(_option), withArg(_withArg), count(1) {}
+		bool operator==(const Option & other);
+	};
+
 	struct NoArgException {
 		QChar option;
 		QString longOption;
+		NoArgException(const QChar & _option) : option(_option) {}
 	};
 	struct UnknownOptionException {
 		QChar option;
 		QString longOption;
 	};
 
-	QGetopt();
-	QGetopt(const QGetopt & other);
-	QGetopt & operator=(const QGetopt & other);
-	virtual ~QGetopt();
+	QGetopt() {}
+	virtual ~QGetopt() {}
 
 	void addOption(const QChar & shortOption);
 	void addOption(const QString & longOption);
@@ -36,4 +47,8 @@ public:
 	int count(const QString & longOption) const;
 
 	const QStringList & getNonArgs() const;
+private:
+	QList<Option> options, foundOptions;
+	Option & getOption(const QChar & shortOption);
+	const Option & getOption(const QChar & shortOption) const;
 };

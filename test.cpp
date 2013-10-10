@@ -9,6 +9,7 @@ void shortOptions()
 	QGetopt getopt;
 	getopt.addOption('a');
 	getopt.addOption('c');
+	getopt.addOption('d');
 
 	getopt.parse(QStringList() << "-a" << "-c");
 	QVERIFY(getopt.hasOption('a'));
@@ -72,23 +73,19 @@ void optWithoutOptarg()
 	getopt.addOption('b');
 	getopt.addOptionWithArg('c');
 
-	bool found_exception = false;
 	try {
-		getopt.parse(QStringList() << "-a" << "-b" << "-c" << "2");
+		getopt.parse(QStringList() << "-b" << "-c" << "2" << "-a");
+		QFAIL("No exception");
 	} catch(QGetopt::NoArgException & e) {
-		QCOMPARE(e.option, 'a');
-		found_exception = true;
+		QCOMPARE(e.option, QChar('a'));
 	}
-	QVERIFY(found_exception);
 
-	found_exception = true;
 	try {
-		getopt.parse(QStringList() << "-a" << "1" "-bc");
+		getopt.parse(QStringList() << "-a" << "1" << "-bc");
+		QFAIL("No exception");
 	} catch(QGetopt::NoArgException & e) {
-		QCOMPARE(e.option, 'c');
-		found_exception = true;
+		QCOMPARE(e.option, QChar('c'));
 	}
-	QVERIFY(found_exception);
 }
 void unknownOption()
 {
@@ -97,14 +94,12 @@ void unknownOption()
 	getopt.addOption('b');
 	getopt.addOptionWithArg('c');
 
-	bool found_exception = false;
 	try {
 		getopt.parse(QStringList() << "-a" << "-d" << "-c" << "2");
+		QFAIL("No exception");
 	} catch(QGetopt::UnknownOptionException & e) {
-		QCOMPARE(e.option, 'd');
-		found_exception = true;
+		QCOMPARE(e.option, QChar('d'));
 	}
-	QVERIFY(found_exception);
 }
 void longOptions()
 {
@@ -162,35 +157,29 @@ void longOptionsWithoutArg()
 	getopt.addOption('b');
 	getopt.addOptionWithArg('c', "count");
 
-	bool found_exception = false;
 	try {
 		getopt.parse(QStringList() << "--add" << "-b" << "-c" << "2");
+		QFAIL("No exception");
 	} catch(QGetopt::NoArgException & e) {
-		QCOMPARE(e.option, 0);
-		QCOMPARE(e.longOption, "add");
-		found_exception = true;
+		QCOMPARE(e.option, QChar());
+		QCOMPARE(e.longOption, QString("add"));
 	}
-	QVERIFY(found_exception);
 
-	found_exception = true;
 	try {
 		getopt.parse(QStringList() << "--add" << "1" << "-bc");
+		QFAIL("No exception");
 	} catch(QGetopt::NoArgException & e) {
-		QCOMPARE(e.option, 'c');
-		QCOMPARE(e.longOption, "count");
-		found_exception = true;
+		QCOMPARE(e.option, QChar('c'));
+		QCOMPARE(e.longOption, QString("count"));
 	}
-	QVERIFY(found_exception);
 
-	found_exception = true;
 	try {
 		getopt.parse(QStringList() << "--add" << "1" << "-b" << "--count");
+		QFAIL("No exception");
 	} catch(QGetopt::NoArgException & e) {
-		QCOMPARE(e.option, 'c');
-		QCOMPARE(e.longOption, "count");
-		found_exception = true;
+		QCOMPARE(e.option, QChar('c'));
+		QCOMPARE(e.longOption, QString("count"));
 	}
-	QVERIFY(found_exception);
 }
 void unknownLongOption()
 {
@@ -199,15 +188,13 @@ void unknownLongOption()
 	getopt.addOption("batch");
 	getopt.addOptionWithArg('c', "count");
 
-	bool found_exception = false;
 	try {
 		getopt.parse(QStringList() << "-a" << "--delete" << "--count" << "2");
+		QFAIL("No exception");
 	} catch(QGetopt::UnknownOptionException & e) {
-		QCOMPARE(e.option, 0);
-		QCOMPARE(e.longOption, "delete");
-		found_exception = true;
+		QCOMPARE(e.option, QChar());
+		QCOMPARE(e.longOption, QString("delete"));
 	}
-	QVERIFY(found_exception);
 }
 void nonOptionArgs()
 {
