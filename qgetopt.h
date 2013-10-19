@@ -23,6 +23,7 @@ public:
 	struct UnknownOptionException {
 		QChar option;
 		QString longOption;
+		UnknownOptionException(const QChar & _option) : option(_option) {}
 	};
 
 	QGetopt() {}
@@ -51,4 +52,5 @@ private:
 	QList<Option> options, foundOptions;
 	Option & getOption(const QChar & shortOption);
 	const Option & getOption(const QChar & shortOption) const;
+	QString getOptionString() const;
 };

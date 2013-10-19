@@ -38,22 +38,30 @@ void QGetopt::addOptionWithArg(const QChar & /*shortOption*/, const QString & /*
 {
 }
 
-void QGetopt::parse(const QStringList & arguments)
-{
-	int argc = arguments.count() + 1;
-	char ** argv = new char*[argc];
-	for(int i = 0; i < argc; ++i) {
-		if(i == 0) {
-			QByteArray data = QCoreApplication::applicationFilePath().toAscii();
+struct Args {
+	int argc;
+	char ** argv;
+	Args(const QStringList & arguments)
+	{
+		argc = arguments.count();
+		argv = new char*[argc];
+		for(int i = 0; i < argc; ++i) {
+			QByteArray data = arguments[i].toAscii();
 			argv[i] = new char[data.size() + 1];
 			strcpy(argv[i], data.constData());
-			continue;
 		}
-		QByteArray data = arguments[i - 1].toAscii();
-		argv[i] = new char[data.size() + 1];
-		strcpy(argv[i], data.data());
 	}
+	~Args()
+	{
+		for(int i = 0; i < argc; ++i) {
+			delete[] argv[i];
+		}
+		delete[] argv;
+	}
+};
 
+QString QGetopt::getOptionString() const
+{
 	QString optionString;
 	foreach(const Option & c, options) {
 		optionString += c.option;
@@ -61,19 +69,30 @@ void QGetopt::parse(const QStringList & arguments)
 			optionString += ":";
 		}
 	}
+	return optionString;
+}
+
+void QGetopt::parse(const QStringList & arguments)
+{
+	QStringList fullCmdArgs = arguments;
+	fullCmdArgs.prepend(QCoreApplication::applicationFilePath());
+	Args args(fullCmdArgs);
+
+	QString optionString = getOptionString();
 	QByteArray text = optionString.toLocal8Bit();
-	char *optionData = new char[text.size() + 1];
-	strcpy(optionData, text.data());
+	text.append(char(0));
 
 	foundOptions.clear();
 	optind = 0;
 	opterr = 0;
 
 	QChar c;
-	while((c = getopt(argc, argv, optionData)) != -1) {
+	while((c = getopt(args.argc, args.argv, text.data())) != -1) {
 		if(c == '?') {
 			if(optionString.contains(QChar(optopt))) {
 				throw NoArgException(QChar(optopt));
+			} else {
+				throw UnknownOptionException(QChar(optopt));
 			}
 		}
 		if(hasOption(c)) {
@@ -89,12 +108,6 @@ void QGetopt::parse(const QStringList & arguments)
 			foundOptions << newOption;
 		}
 	}
-
-	delete[] optionData;
-	for(int i = 0; i < argc; ++i) {
-		delete[] argv[i];
-	}
-	delete[] argv;
 }
 
 const QGetopt::Option & QGetopt::getOption(const QChar & shortOption) const
