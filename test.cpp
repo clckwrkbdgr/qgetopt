@@ -4,6 +4,46 @@
 class TestQGetopt : public QObject {
 	Q_OBJECT
 private slots:
+void option()
+{
+	QCOMPARE(QGetopt::Option('a').option, QChar('a'));
+	QCOMPARE(QGetopt::Option('a').longOption, QString());
+	QCOMPARE(QGetopt::Option('a', true).option, QChar('a'));
+	QCOMPARE(QGetopt::Option('a', false).longOption, QString());
+	QCOMPARE(QGetopt::Option('a', true).withArg, true);
+	QCOMPARE(QGetopt::Option('a', false).withArg, false);
+
+	QCOMPARE(QGetopt::Option("add").option, QChar());
+	QCOMPARE(QGetopt::Option("add").longOption, QString("add"));
+	QCOMPARE(QGetopt::Option("add", true).option, QChar());
+	QCOMPARE(QGetopt::Option("add", false).longOption, QString("add"));
+	QCOMPARE(QGetopt::Option("add", true).withArg, true);
+	QCOMPARE(QGetopt::Option("add", false).withArg, false);
+
+	QCOMPARE(QGetopt::Option('a', "add").option, QChar('a'));
+	QCOMPARE(QGetopt::Option('a', "add").longOption, QString("add"));
+	QCOMPARE(QGetopt::Option('a', "add", true).option, QChar('a'));
+	QCOMPARE(QGetopt::Option('a', "add", false).longOption, QString("add"));
+	QCOMPARE(QGetopt::Option('a', "add", true).withArg, true);
+	QCOMPARE(QGetopt::Option('a', "add", false).withArg, false);
+}
+void optionEqual()
+{
+	QVERIFY(QGetopt::Option('a') == QGetopt::Option('a'));
+	QVERIFY(QGetopt::Option('a') != QGetopt::Option('b'));
+
+	QVERIFY(QGetopt::Option("add") == QGetopt::Option("add"));
+	QVERIFY(QGetopt::Option("count") != QGetopt::Option("add"));
+
+	QVERIFY(QGetopt::Option('a') != QGetopt::Option("add"));
+	QVERIFY(QGetopt::Option("add") != QGetopt::Option('a'));
+
+	QVERIFY(QGetopt::Option('a', "add") == QGetopt::Option('a'));
+	QVERIFY(QGetopt::Option('a', "add") == QGetopt::Option("add"));
+	QVERIFY(QGetopt::Option('a', "add") == QGetopt::Option('a', "add"));
+	QVERIFY(QGetopt::Option('a', "add") != QGetopt::Option('b'));
+	QVERIFY(QGetopt::Option('a', "add") != QGetopt::Option("count"));
+}
 void shortOptions()
 {
 	QGetopt getopt;
@@ -111,8 +151,8 @@ void longOptions()
 	getopt.parse(QStringList() << "-a" << "--count");
 	QVERIFY(getopt.hasOption('a'));
 	QVERIFY(!getopt.hasOption("add"));
-	QVERIFY(getopt.hasOption('c'));
 	QVERIFY(getopt.hasOption("count"));
+	QVERIFY(getopt.hasOption('c'));
 
 	getopt.parse(QStringList() << "-a" << "--count" << "--add");
 	QVERIFY(getopt.hasOption('a'));

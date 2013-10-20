@@ -7,23 +7,33 @@ class QGetopt {
 public:
 	struct Option {
 		QChar option;
+		QString longOption;
 		bool withArg;
 		QStringList args;
 		int count;
-		Option() : withArg(false), count(0) {}
-		Option(const QChar & _option, bool _withArg = false) : option(_option), withArg(_withArg), count(1) {}
-		bool operator==(const Option & other);
+
+		Option();
+		explicit Option(const QChar & _option, int _withArg = false);
+		explicit Option(const QString & _longOption, int _withArg = false);
+		explicit Option(const QChar & _option, const QString & _longOption, int _withArg = false);
+		bool operator==(const Option & other) const;
+		bool operator!=(const Option & other) const { return !(*this == other); }
 	};
 
-	struct NoArgException {
+	struct GetoptException {
 		QChar option;
 		QString longOption;
-		NoArgException(const QChar & _option) : option(_option) {}
+		GetoptException(const QChar & _option) : option(_option) {}
+		GetoptException(const QString & _option) : longOption(_option) {}
+		virtual ~GetoptException() {}
 	};
-	struct UnknownOptionException {
-		QChar option;
-		QString longOption;
-		UnknownOptionException(const QChar & _option) : option(_option) {}
+	struct NoArgException : GetoptException {
+		NoArgException(const QString & _option) : GetoptException(_option) {}
+		NoArgException(const QChar & _option) : GetoptException(_option) {}
+	};
+	struct UnknownOptionException : GetoptException {
+		UnknownOptionException(const QChar & _option) : GetoptException(_option) {}
+		UnknownOptionException(const QString & _option) : GetoptException(_option) {}
 	};
 
 	QGetopt() {}
@@ -50,7 +60,10 @@ public:
 	const QStringList & getNonArgs() const;
 private:
 	QList<Option> options, foundOptions;
+
 	Option & getOption(const QChar & shortOption);
 	const Option & getOption(const QChar & shortOption) const;
+	Option & getOption(const QString & longOption);
+	const Option & getOption(const QString & longOption) const;
 	QString getOptionString() const;
 };
