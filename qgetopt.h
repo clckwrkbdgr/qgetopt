@@ -23,17 +23,14 @@ public:
 	struct GetoptException {
 		QChar option;
 		QString longOption;
-		GetoptException(const QChar & _option) : option(_option) {}
-		GetoptException(const QString & _option) : longOption(_option) {}
+		GetoptException(const Option & o) : option(o.option), longOption(o.longOption) {}
 		virtual ~GetoptException() {}
 	};
 	struct NoArgException : GetoptException {
-		NoArgException(const QString & _option) : GetoptException(_option) {}
-		NoArgException(const QChar & _option) : GetoptException(_option) {}
+		NoArgException(const Option & o) : GetoptException(o) {}
 	};
 	struct UnknownOptionException : GetoptException {
-		UnknownOptionException(const QChar & _option) : GetoptException(_option) {}
-		UnknownOptionException(const QString & _option) : GetoptException(_option) {}
+		UnknownOptionException(const Option & o) : GetoptException(o) {}
 	};
 
 	QGetopt() {}
@@ -60,6 +57,7 @@ public:
 	const QStringList & getNonArgs() const;
 private:
 	QList<Option> options, foundOptions;
+	QStringList nonArgs;
 
 	Option & getOption(const QChar & shortOption);
 	const Option & getOption(const QChar & shortOption) const;

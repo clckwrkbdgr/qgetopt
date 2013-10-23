@@ -198,7 +198,7 @@ void longOptionsWithoutArg()
 	getopt.addOptionWithArg('c', "count");
 
 	try {
-		getopt.parse(QStringList() << "--add" << "-b" << "-c" << "2");
+		getopt.parse(QStringList() << "--add");
 		QFAIL("No exception");
 	} catch(QGetopt::NoArgException & e) {
 		QCOMPARE(e.option, QChar());
@@ -256,8 +256,9 @@ void nonOptionArgs()
 	QVERIFY(getopt.hasOption('a'));
 	QVERIFY(getopt.hasOption("batch"));
 	QVERIFY(getopt.hasOption('c'));
+	QVERIFY(getopt.hasOption('4'));
 	QCOMPARE(getopt.getArg('c'), QString("2"));
-	QCOMPARE(getopt.getNonArgs(), QStringList() << QString("3") << QString("-4"));
+	QCOMPARE(getopt.getNonArgs(), QStringList() << QString("3"));
 
 	getopt.parse(QStringList() << "-a" << "--batch" << "--count" << "2" << "-3" << "-4");
 	QVERIFY(getopt.hasOption('a'));

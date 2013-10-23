@@ -55,12 +55,14 @@ void QGetopt::addOptionWithArg(const QChar & shortOption)
 	options << Option(shortOption, QString(), true);
 }
 
-void QGetopt::addOptionWithArg(const QString & /*longOption*/)
+void QGetopt::addOptionWithArg(const QString & longOption)
 {
+	options << Option(QChar(), longOption, true);
 }
 
-void QGetopt::addOptionWithArg(const QChar & /*shortOption*/, const QString & /*longOption*/)
+void QGetopt::addOptionWithArg(const QChar & shortOption, const QString & longOption)
 {
+	options << Option(shortOption, longOption, true);
 }
 
 struct Args {
@@ -117,7 +119,7 @@ struct LongOpts {
 
 			longopts.append(option());
 			longopts.last().name = s;
-			longopts.last().has_arg = 0;
+			longopts.last().has_arg = o.withArg ? required_argument : no_argument;
 			longopts.last().flag = 0;
 			longopts.last().val = 0;
 		}
@@ -146,68 +148,76 @@ void QGetopt::parse(const QStringList & arguments)
 	text.append(char(0));
 
 	foundOptions.clear();
+	nonArgs.clear();
 	optind = 0;
 	opterr = 0;
 
 	LongOpts longopts(options);
-
-	/*
-	foreach(const Option & o, options) {
-		qDebug() << (o.option.isNull() ? ' ' : o.option) << o.longOption;
-	}
-	//*/
-
+	
 	QChar c;
 	int indexopt = 0;
 	while((c = getopt_long(args.argc, args.argv, text.data(), longopts.longopts.constData(), &indexopt)) != -1) {
-		QString l = c.isNull() ? QString(args.argv[optind - 1]) : QString();
-		if(l.startsWith("--")) {
-			l.remove(0, 2);
-		}
+		QString l = (c.isNull() || c == '?') ? QString(longopts.longopts[indexopt].name) : QString();
 
-		//qDebug() << indexopt << (c.isNull() ? ' ' : c) << (optopt ? QChar(optopt) : ' ') << l << optind;
-		if(c == '?') {
-			if(optionString.contains(QChar(optopt))) {
-				if(optopt) {
-					throw NoArgException(QChar(optopt));
-				} else {
-					throw NoArgException(l);
+		if(c.isNull()) {
+			if(hasOption(l)) {
+				getOption(l).count++;
+				if(optarg) {
+					getOption(l).args << QString(optarg);
 				}
 			} else {
-				if(optopt) {
-					throw UnknownOptionException(QChar(optopt));
-				} else {
-					throw UnknownOptionException(l);
+				int index = options.indexOf(Option(l));
+				if(index == -1) {
+					throw UnknownOptionException(Option(l));
 				}
-			}
-		}
-		if(hasOption(l)) {
-			getOption(l).count++;
-			if(optarg) {
-				getOption(l).args << QString(optarg);
-			}
-		} else if(hasOption(c)) {
-			getOption(c).count++;
-			if(optarg) {
-				getOption(c).args << QString(optarg);
+				Option newOption = options[index];
+				if(optarg) {
+					newOption.args << QString(optarg);
+				}
+				foundOptions << newOption;
 			}
 		} else {
-			int index = options.indexOf(Option(c, l));
-			Q_ASSERT(index > -1);
-			Option newOption = options[index];
-			if(optarg) {
-				newOption.args << QString(optarg);
+			if(c == '?') {
+				if(optionString.contains(QChar(optopt))) {
+					int index = options.indexOf(Option(QChar(optopt)));
+					throw NoArgException(options.value(index));
+				} else {
+					if(optopt) {
+						throw UnknownOptionException(Option(QChar(optopt)));
+					} else {
+						l = args.argv[optind - 1];
+						if(l.startsWith("--")) {
+							l.remove(0, 2);
+						}
+						int index = options.indexOf(Option(l));
+						if(index < 0) {
+							throw UnknownOptionException(Option(l));
+						} else {
+							throw NoArgException(options[index]);
+						}
+					}
+				}
 			}
-			foundOptions << newOption;
+			if(hasOption(c)) {
+				getOption(c).count++;
+				if(optarg) {
+					getOption(c).args << QString(optarg);
+				}
+			} else {
+				int index = options.indexOf(Option(c));
+				Q_ASSERT(index > -1);
+				Option newOption = options[index];
+				if(optarg) {
+					newOption.args << QString(optarg);
+				}
+				foundOptions << newOption;
+			}
 		}
 	}
 
-	/*
-	foreach(const Option & o, foundOptions) {
-		qDebug() << (o.option.isNull() ? '_' : o.option) << o.longOption;
+	for(int i = optind; i < args.argc; ++i) {
+		nonArgs << QString(args.argv[i]);
 	}
-	//*/
-
 }
 
 const QGetopt::Option & QGetopt::getOption(const QChar & shortOption) const
@@ -261,7 +271,9 @@ bool QGetopt::hasOption(const QChar & shortOption) const
 
 bool QGetopt::hasOption(const QString & longOption) const
 {
+	//qDebug() << "hasoption" << longOption;
 	return foundOptions.contains(Option(longOption));
+	//qDebug() << "hasoption" << ok;
 }
 
 const QString & QGetopt::getArg(const QChar & shortOption) const
@@ -269,10 +281,9 @@ const QString & QGetopt::getArg(const QChar & shortOption) const
 	return getOption(shortOption).args.first();
 }
 
-const QString & QGetopt::getArg(const QString & /*longOption*/) const
+const QString & QGetopt::getArg(const QString & longOption) const
 {
-	static QString result;
-	return result;
+	return getOption(longOption).args.first();
 }
 
 const QStringList & QGetopt::getArgs(const QChar & shortOption) const
@@ -280,10 +291,9 @@ const QStringList & QGetopt::getArgs(const QChar & shortOption) const
 	return getOption(shortOption).args;
 }
 
-const QStringList & QGetopt::getArgs(const QString & /*longOption*/) const
+const QStringList & QGetopt::getArgs(const QString & longOption) const
 {
-	static QStringList result;
-	return result;
+	return getOption(longOption).args;
 }
 
 int QGetopt::count(const QChar & shortOption) const
@@ -291,14 +301,13 @@ int QGetopt::count(const QChar & shortOption) const
 	return getOption(shortOption).count;
 }
 
-int QGetopt::count(const QString & /*longOption*/) const
+int QGetopt::count(const QString & longOption) const
 {
-	return 0;
+	return getOption(longOption).count;
 }
 
 const QStringList & QGetopt::getNonArgs() const
 {
-	static QStringList result;
-	return result;
+	return nonArgs;
 }
 
