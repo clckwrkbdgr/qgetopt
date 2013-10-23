@@ -43,6 +43,9 @@ void optionEqual()
 	QVERIFY(QGetopt::Option('a', "add") == QGetopt::Option('a', "add"));
 	QVERIFY(QGetopt::Option('a', "add") != QGetopt::Option('b'));
 	QVERIFY(QGetopt::Option('a', "add") != QGetopt::Option("count"));
+
+	QVERIFY(QGetopt::Option('a', "add") != QGetopt::Option('b', "add"));
+	QVERIFY(QGetopt::Option('a', "add") != QGetopt::Option('a', "count"));
 }
 void shortOptions()
 {

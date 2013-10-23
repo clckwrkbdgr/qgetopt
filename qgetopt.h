@@ -4,22 +4,8 @@
 #include <QtCore/QList>
 
 class QGetopt {
+	struct Option;
 public:
-	struct Option {
-		QChar option;
-		QString longOption;
-		bool withArg;
-		QStringList args;
-		int count;
-
-		Option();
-		explicit Option(const QChar & _option, int _withArg = false);
-		explicit Option(const QString & _longOption, int _withArg = false);
-		explicit Option(const QChar & _option, const QString & _longOption, int _withArg = false);
-		bool operator==(const Option & other) const;
-		bool operator!=(const Option & other) const { return !(*this == other); }
-	};
-
 	struct GetoptException {
 		QChar option;
 		QString longOption;
@@ -56,12 +42,28 @@ public:
 
 	const QStringList & getNonArgs() const;
 private:
+	struct Option {
+		QChar option;
+		QString longOption;
+		bool withArg;
+		QStringList args;
+		int count;
+
+		Option();
+		explicit Option(const QChar & _option, int _withArg = false);
+		explicit Option(const QString & _longOption, int _withArg = false);
+		explicit Option(const QChar & _option, const QString & _longOption, int _withArg = false);
+		operator bool() const { return !option.isNull() || !longOption.isEmpty(); }
+		bool operator==(const Option & other) const;
+		bool operator!=(const Option & other) const { return !(*this == other); }
+	};
 	QList<Option> options, foundOptions;
 	QStringList nonArgs;
 
-	Option & getOption(const QChar & shortOption);
-	const Option & getOption(const QChar & shortOption) const;
-	Option & getOption(const QString & longOption);
-	const Option & getOption(const QString & longOption) const;
+	Option & getOption(const Option & option);
+	const Option & getOption(const Option & option) const;
 	QString getOptionString() const;
+
+	friend class LongOpts;
+	friend class TestQGetopt;
 };
