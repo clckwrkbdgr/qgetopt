@@ -1,4 +1,7 @@
 #pragma once
+/** QGetopt v0.1.0
+ * Header file: class definition.
+ */
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 #include <QtCore/QList>

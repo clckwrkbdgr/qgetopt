@@ -1,3 +1,6 @@
+/** QGetopt v0.1.0
+ * Source file: class implementation.
+ */
 #include "qgetopt.h"
 #include <QtCore/QStringList>
 #include <QtCore/QCoreApplication>
