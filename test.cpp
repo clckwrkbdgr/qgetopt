@@ -84,9 +84,7 @@ void shortOptions()
 void optargs()
 {
 	QGetopt getopt;
-	getopt.addOptionWithArg('a');
-	getopt.addOption('b');
-	getopt.addOptionWithArg('c');
+	getopt.addOptionWithArg('a').addOption('b').addOptionWithArg('c');
 
 	getopt.parse(QStringList() << "-a" << "1" << "-b" << "-c" << "2");
 	QVERIFY(getopt.hasOption('a'));

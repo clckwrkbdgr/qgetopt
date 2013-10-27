@@ -1,7 +1,7 @@
 #include "qgetopt.h"
 #include <QtCore/QStringList>
 #include <QtCore/QCoreApplication>
-#include <QtDebug>
+#include <QtCore/QVector>
 namespace Getopt {
 #include <getopt.h>
 }
@@ -43,36 +43,47 @@ bool QGetopt::Option::operator==(const Option & other) const
 	return false;
 }
 
-void QGetopt::addOption(const QChar & shortOption)
+QGetopt & QGetopt::addOption(const QChar & shortOption)
 {
 	options << Option(shortOption);
+	return * this;
 }
 
-void QGetopt::addOption(const QString & longOption)
+QGetopt & QGetopt::addOption(const QString & longOption)
 {
 	options << Option(QChar(), longOption);
+	return * this;
 }
 
-void QGetopt::addOption(const QChar & shortOption, const QString & longOption)
+QGetopt & QGetopt::addOption(const QChar & shortOption, const QString & longOption)
 {
 	options << Option(shortOption, longOption);
+	return * this;
 }
 
-void QGetopt::addOptionWithArg(const QChar & shortOption)
+QGetopt & QGetopt::addOptionWithArg(const QChar & shortOption)
 {
 	options << Option(shortOption, QString(), true);
+	return * this;
 }
 
-void QGetopt::addOptionWithArg(const QString & longOption)
+QGetopt & QGetopt::addOptionWithArg(const QString & longOption)
 {
 	options << Option(QChar(), longOption, true);
+	return * this;
 }
 
-void QGetopt::addOptionWithArg(const QChar & shortOption, const QString & longOption)
+QGetopt & QGetopt::addOptionWithArg(const QChar & shortOption, const QString & longOption)
 {
 	options << Option(shortOption, longOption, true);
+	return * this;
 }
 
+// Helper struct.
+// Aquires QStringList and creates an array of char*.
+// So it can be put in getopt.
+// Is a RAII, so resources allocated will be freed on scope exit.
+// Has standard argc and argv fields.
 struct Args {
 	int argc;
 	char ** argv;
@@ -110,6 +121,8 @@ QString QGetopt::getOptionString() const
 	return optionString;
 }
 
+// Helper struct for creating array of long options for getopt_long().
+// Is also a RAII, so any allocated memory will be freed.
 struct LongOpts {
 	QVector<Getopt::option> longopts;
 
@@ -145,7 +158,12 @@ struct LongOpts {
 	}
 };
 
-void QGetopt::parse(const QStringList & arguments)
+QGetopt & QGetopt::parseApplicationArguments()
+{
+	return parse(QCoreApplication::arguments());
+}
+
+QGetopt & QGetopt::parse(const QStringList & arguments)
 {
 	Args args(QStringList() << QCoreApplication::applicationFilePath() << arguments);
 	QByteArray optionString = getOptionString().toLocal8Bit();
@@ -203,6 +221,7 @@ void QGetopt::parse(const QStringList & arguments)
 	for(int i = Getopt::optind; i < args.argc; ++i) {
 		nonArgs << QString(args.argv[i]);
 	}
+	return * this;
 }
 
 const QGetopt::Option & QGetopt::getOption(const Option & option) const
