@@ -1,4 +1,4 @@
-/** QGetopt v0.1.0
+/** QGetopt v0.1.2
  * Source file: class implementation.
  */
 #include "qgetopt.h"
@@ -168,7 +168,7 @@ QGetopt & QGetopt::parseApplicationArguments()
 
 QGetopt & QGetopt::parse(const QStringList & arguments)
 {
-	Args args(QStringList() << QCoreApplication::applicationFilePath() << arguments);
+	Args args(arguments);
 	QByteArray optionString = getOptionString().toLocal8Bit();
 	LongOpts longopts(options);
 	

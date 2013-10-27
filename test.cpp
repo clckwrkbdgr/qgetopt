@@ -54,28 +54,28 @@ void shortOptions()
 	getopt.addOption('c');
 	getopt.addOption('d');
 
-	getopt.parse(QStringList() << "-a" << "-c");
+	getopt.parse(QStringList() << "./test" << "-a" << "-c");
 	QVERIFY(getopt.hasOption('a'));
 	QVERIFY(getopt.hasOption('c'));
 
-	getopt.parse(QStringList() << "-c" << "-a");
+	getopt.parse(QStringList() << "./test" << "-c" << "-a");
 	QVERIFY(getopt.hasOption('a'));
 	QVERIFY(getopt.hasOption('c'));
 
-	getopt.parse(QStringList() << "-a" << "-d");
+	getopt.parse(QStringList() << "./test" << "-a" << "-d");
 	QVERIFY(getopt.hasOption('a'));
 	QVERIFY(!getopt.hasOption('c'));
 	QVERIFY(getopt.hasOption('d'));
 
-	getopt.parse(QStringList() << "-ac");
+	getopt.parse(QStringList() << "./test" << "-ac");
 	QVERIFY(getopt.hasOption('a'));
 	QVERIFY(getopt.hasOption('c'));
 
-	getopt.parse(QStringList() << "-ca");
+	getopt.parse(QStringList() << "./test" << "-ca");
 	QVERIFY(getopt.hasOption('a'));
 	QVERIFY(getopt.hasOption('c'));
 
-	getopt.parse(QStringList() << "-caaa");
+	getopt.parse(QStringList() << "./test" << "-caaa");
 	QVERIFY(getopt.hasOption('a'));
 	QCOMPARE(getopt.count('a'), 3);
 	QVERIFY(getopt.hasOption('c'));
@@ -86,14 +86,14 @@ void optargs()
 	QGetopt getopt;
 	getopt.addOptionWithArg('a').addOption('b').addOptionWithArg('c');
 
-	getopt.parse(QStringList() << "-a" << "1" << "-b" << "-c" << "2");
+	getopt.parse(QStringList() << "./test" << "-a" << "1" << "-b" << "-c" << "2");
 	QVERIFY(getopt.hasOption('a'));
 	QVERIFY(getopt.hasOption('b'));
 	QVERIFY(getopt.hasOption('c'));
 	QCOMPARE(getopt.getArg('a'), QString("1"));
 	QCOMPARE(getopt.getArg('c'), QString("2"));
 
-	getopt.parse(QStringList() << "-a" << "1" << "-bc" << "2");
+	getopt.parse(QStringList() << "./test" << "-a" << "1" << "-bc" << "2");
 	QVERIFY(getopt.hasOption('a'));
 	QVERIFY(getopt.hasOption('b'));
 	QVERIFY(getopt.hasOption('c'));
@@ -101,7 +101,7 @@ void optargs()
 	QCOMPARE(getopt.getArgs('a'), QStringList() << "1");
 	QCOMPARE(getopt.getArg('c'), QString("2"));
 
-	getopt.parse(QStringList() << "-a" << "1" << "-a" << "2");
+	getopt.parse(QStringList() << "./test" << "-a" << "1" << "-a" << "2");
 	QVERIFY(getopt.hasOption('a'));
 	QCOMPARE(getopt.count('a'), 2);
 	QCOMPARE(getopt.getArg('a'), QString("1"));
@@ -115,14 +115,14 @@ void optWithoutOptarg()
 	getopt.addOptionWithArg('c');
 
 	try {
-		getopt.parse(QStringList() << "-b" << "-c" << "2" << "-a");
+		getopt.parse(QStringList() << "./test" << "-b" << "-c" << "2" << "-a");
 		QFAIL("No exception");
 	} catch(QGetopt::NoArgException & e) {
 		QCOMPARE(e.option, QChar('a'));
 	}
 
 	try {
-		getopt.parse(QStringList() << "-a" << "1" << "-bc");
+		getopt.parse(QStringList() << "./test" << "-a" << "1" << "-bc");
 		QFAIL("No exception");
 	} catch(QGetopt::NoArgException & e) {
 		QCOMPARE(e.option, QChar('c'));
@@ -136,7 +136,7 @@ void unknownOption()
 	getopt.addOptionWithArg('c');
 
 	try {
-		getopt.parse(QStringList() << "-a" << "-d" << "-c" << "2");
+		getopt.parse(QStringList() << "./test" << "-a" << "-d" << "-c" << "2");
 		QFAIL("No exception");
 	} catch(QGetopt::UnknownOptionException & e) {
 		QCOMPARE(e.option, QChar('d'));
@@ -149,13 +149,13 @@ void longOptions()
 	getopt.addOption("add");
 	getopt.addOption('c', "count");
 
-	getopt.parse(QStringList() << "-a" << "--count");
+	getopt.parse(QStringList() << "./test" << "-a" << "--count");
 	QVERIFY(getopt.hasOption('a'));
 	QVERIFY(!getopt.hasOption("add"));
 	QVERIFY(getopt.hasOption("count"));
 	QVERIFY(getopt.hasOption('c'));
 
-	getopt.parse(QStringList() << "-a" << "--count" << "--add");
+	getopt.parse(QStringList() << "./test" << "-a" << "--count" << "--add");
 	QVERIFY(getopt.hasOption('a'));
 	QVERIFY(getopt.hasOption("add"));
 	QVERIFY(getopt.hasOption("count"));
@@ -167,7 +167,7 @@ void longOptionsWithArg()
 	getopt.addOptionWithArg("add");
 	getopt.addOptionWithArg('c', "count");
 
-	getopt.parse(QStringList() << "-a" << "--count" << "1");
+	getopt.parse(QStringList() << "./test" << "-a" << "--count" << "1");
 	QVERIFY(getopt.hasOption('a'));
 	QVERIFY(!getopt.hasOption("add"));
 	QVERIFY(getopt.hasOption('c'));
@@ -175,7 +175,7 @@ void longOptionsWithArg()
 	QCOMPARE(getopt.getArg('c'), QString("1"));
 	QCOMPARE(getopt.getArg("count"), QString("1"));
 
-	getopt.parse(QStringList() << "-a" << "--count" << "1" << "--add" << "2");
+	getopt.parse(QStringList() << "./test" << "-a" << "--count" << "1" << "--add" << "2");
 	QVERIFY(getopt.hasOption('a'));
 	QVERIFY(getopt.hasOption("add"));
 	QVERIFY(getopt.hasOption("count"));
@@ -183,7 +183,7 @@ void longOptionsWithArg()
 	QCOMPARE(getopt.getArg("count"), QString("1"));
 	QCOMPARE(getopt.getArg("add"), QString("2"));
 
-	getopt.parse(QStringList() << "--count" << "1" << "--count" << "2");
+	getopt.parse(QStringList() << "./test" << "--count" << "1" << "--count" << "2");
 	QVERIFY(!getopt.hasOption('a'));
 	QVERIFY(!getopt.hasOption("add"));
 	QVERIFY(getopt.hasOption("count"));
@@ -199,7 +199,7 @@ void longOptionsWithoutArg()
 	getopt.addOptionWithArg('c', "count");
 
 	try {
-		getopt.parse(QStringList() << "--add");
+		getopt.parse(QStringList() << "./test" << "--add");
 		QFAIL("No exception");
 	} catch(QGetopt::NoArgException & e) {
 		QCOMPARE(e.option, QChar());
@@ -207,7 +207,7 @@ void longOptionsWithoutArg()
 	}
 
 	try {
-		getopt.parse(QStringList() << "--add" << "1" << "-bc");
+		getopt.parse(QStringList() << "./test" << "--add" << "1" << "-bc");
 		QFAIL("No exception");
 	} catch(QGetopt::NoArgException & e) {
 		QCOMPARE(e.option, QChar('c'));
@@ -215,7 +215,7 @@ void longOptionsWithoutArg()
 	}
 
 	try {
-		getopt.parse(QStringList() << "--add" << "1" << "-b" << "--count");
+		getopt.parse(QStringList() << "./test" << "--add" << "1" << "-b" << "--count");
 		QFAIL("No exception");
 	} catch(QGetopt::NoArgException & e) {
 		QCOMPARE(e.option, QChar('c'));
@@ -230,7 +230,7 @@ void unknownLongOption()
 	getopt.addOptionWithArg('c', "count");
 
 	try {
-		getopt.parse(QStringList() << "-a" << "--delete" << "--count" << "2");
+		getopt.parse(QStringList() << "./test" << "-a" << "--delete" << "--count" << "2");
 		QFAIL("No exception");
 	} catch(QGetopt::UnknownOptionException & e) {
 		QCOMPARE(e.option, QChar());
@@ -246,14 +246,14 @@ void nonOptionArgs()
 	getopt.addOption("batch");
 	getopt.addOptionWithArg('c', "count");
 
-	getopt.parse(QStringList() << "-a" << "--batch" << "--count" << "2" << "3" << "4");
+	getopt.parse(QStringList() << "./test" << "-a" << "--batch" << "--count" << "2" << "3" << "4");
 	QVERIFY(getopt.hasOption('a'));
 	QVERIFY(getopt.hasOption("batch"));
 	QVERIFY(getopt.hasOption('c'));
 	QCOMPARE(getopt.getArg('c'), QString("2"));
 	QCOMPARE(getopt.getNonArgs(), QStringList() << QString("3") << QString("4"));
 
-	getopt.parse(QStringList() << "-a" << "--batch" << "--count" << "2" << "3" << "-4");
+	getopt.parse(QStringList() << "./test" << "-a" << "--batch" << "--count" << "2" << "3" << "-4");
 	QVERIFY(getopt.hasOption('a'));
 	QVERIFY(getopt.hasOption("batch"));
 	QVERIFY(getopt.hasOption('c'));
@@ -261,7 +261,7 @@ void nonOptionArgs()
 	QCOMPARE(getopt.getArg('c'), QString("2"));
 	QCOMPARE(getopt.getNonArgs(), QStringList() << QString("3"));
 
-	getopt.parse(QStringList() << "-a" << "--batch" << "--count" << "2" << "-3" << "-4");
+	getopt.parse(QStringList() << "./test" << "-a" << "--batch" << "--count" << "2" << "-3" << "-4");
 	QVERIFY(getopt.hasOption('a'));
 	QVERIFY(getopt.hasOption("batch"));
 	QVERIFY(getopt.hasOption('c'));
@@ -270,7 +270,7 @@ void nonOptionArgs()
 	QCOMPARE(getopt.getArg('c'), QString("2"));
 	QCOMPARE(getopt.getNonArgs(), QStringList());
 
-	getopt.parse(QStringList() << "-a" << "--batch" << "--count" << "2" << "--" << "-3" << "-4");
+	getopt.parse(QStringList() << "./test" << "-a" << "--batch" << "--count" << "2" << "--" << "-3" << "-4");
 	QVERIFY(getopt.hasOption('a'));
 	QVERIFY(getopt.hasOption("batch"));
 	QVERIFY(getopt.hasOption('c'));
